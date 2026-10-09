@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="東京富士山">
+  <meta name="theme-color" content="#1e3a8a">
+  <title>2027 東京・富士山之旅</title>
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/tokyo.png">
+  <link rel="icon" type="image/png" href="https://img.icons8.com/color/180/tokyo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex flex-col h-screen overflow-hidden font-sans">
+
+  <!-- Header -->
+  <header class="bg-blue-900 text-white pt-3 pb-3 px-4 shadow-md flex items-center justify-between shrink-0">
+    <div>
+      <h1 class="text-lg font-bold tracking-wide">東京・富士山 6日漫遊</h1>
+      <p class="text-xs text-blue-200">2027/09/03 - 09/08 ｜ 住東京站八重洲</p>
+    </div>
+    <div class="text-right">
+      <span class="inline-block bg-blue-800 text-blue-100 text-xs px-2.5 py-1 rounded-full border border-blue-700">PWA 離線版</span>
+    </div>
+  </header>
+
+  <!-- 日期滑動選擇 Bar -->
+  <nav class="bg-white border-b border-slate-200 shrink-0 overflow-x-auto no-scrollbar">
+    <div id="day-tabs" class="flex px-2 py-2 space-x-2 text-sm font-medium whitespace-nowrap">
+      <!-- Tabs 由 JS 生成 -->
+    </div>
+  </nav>
+
+  <!-- 內容顯示區域 -->
+  <main id="content-area" class="flex-1 overflow-y-auto p-4 space-y-4">
+    <!-- 行程卡片由 JS 動態填入 -->
+  </main>
+
+  <!-- 底部導航欄 -->
+  <footer class="bg-white border-t border-slate-200 py-2 px-6 flex justify-around shrink-0 text-xs">
+    <button onclick="switchView('itinerary')" id="nav-itin" class="flex flex-col items-center text-blue-600 font-bold">
+      <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      <span>每日行程</span>
+    </button>
+    <button onclick="switchView('transit')" id="nav-transit" class="flex flex-col items-center text-slate-500 hover:text-blue-600">
+      <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+      <span>搭車速查</span>
+    </button>
+    <button onclick="switchView('expense')" id="nav-expense" class="flex flex-col items-center text-slate-500 hover:text-blue-600">
+      <svg class="w-6 h-6 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span>即時記帳</span>
+    </button>
+  </footer>
+
+  <script>
+    const tripData = [
+      {
+        day: 'Day 1',
+        date: '9/3 (五)',
+        title: '台中開車 ➔ 成田入境 ➔ 進駐八重洲',
+        items: [
+          { time: '09:30', title: '台中自行開車出發', desc: '北上前往桃園機場外圍特約停車場（如大園/日月亭），預留 2 小時車程與接駁緩衝。', query: '桃園國際機場第一航廈' },
+          { time: '12:00', title: '桃機第一航廈報到', desc: '搭接駁車抵達 T1，辦理台灣虎航 IT202 登機手續與託運（14:25 起飛）。', query: '桃園國際機場第一航廈' },
+          { time: '18:35', title: '抵達成田第二航廈', desc: '班機降落成田 T2，提領行李出關後至 1 樓 6 號月台搭乘 TYO-NRT 快速巴士直達東京站八重洲。', query: '成田空港第2ターミナル' },
+          { time: '21:15', title: '抵達飯店 Check-in', desc: '巴士直達八重洲南口，步行進駐飯店。晚餐推薦東京站一番街「東京拉麵街」（六厘舍沾麵）。', query: '東京駅 八重洲南口' }
+        ]
+      },
+      {
+        day: 'Day 2',
+        date: '9/4 (六)',
+        title: '皇居外苑 ➔ 銀座漫步 ➔ 澀谷夕陽夜景',
+        items: [
+          { time: '08:30', title: '皇居外苑散步', desc: '經站內地下連通道至丸之內口，步行至和田倉噴水公園與皇居二重橋，綠意悠閒。', query: '皇居二重橋' },
+          { time: '11:45', title: '銀座洋食午餐與漫步', desc: '品嚐百年洋食「煉瓦亭」蛋包飯或「銀座篝」拉麵；參觀銀座伊東屋文具旗艦店與 GINZA SIX。', query: '銀座伊東屋' },
+          { time: '17:00', title: 'SHIBUYA SKY 暮色展望', desc: '搭銀座線直達澀谷，登頂 SHIBUYA SKY 俯瞰全東京夜景與十字路口（需提前 1 個月預約時段）。', query: 'SHIBUYA SKY' }
+        ]
+      },
+      {
+        day: 'Day 3',
+        date: '9/5 (日)',
+        title: '淺草雷門 ➔ 晴空塔 ➔ 台場海濱夕陽',
+        items: [
+          { time: '08:45', title: '淺草寺與雷門參拜', desc: '搭銀座線直達淺草站，漫步雷門與仲見世通，午餐推薦「駒形前川」鰻魚飯。', query: '浅草寺 雷門' },
+          { time: '13:30', title: '隅田川水岸步道 ➔ 晴空塔', desc: '走隅田川步道橋直通晴空塔城，逛街並登上展望台眺望關東平原。', query: '東京スカイツリー' },
+          { time: '17:00', title: '台場海濱公園夜景', desc: '搭乘百合海鷗號或水上巴士前往台場，欣賞彩虹大橋、自由女神與東京灣落日。', query: 'お台場海浜公園' }
+        ]
+      },
+      {
+        day: 'Day 4',
+        date: '9/6 (一)',
+        title: '富士山・河口湖經典一日遊（Klook 專車）',
+        items: [
+          { time: '07:20', title: '東京站集合出發', desc: '穿過地下道至丸之內南口（KITTE 大樓前）找導遊集合，搭乘專車直達富士山，免轉車煩惱。', query: 'KITTE丸の内' },
+          { time: '10:00', title: '新倉山淺間公園', desc: '登忠靈塔觀景台，拍攝五重塔＋富士山經典同框全景。', query: '新倉山浅間公園' },
+          { time: '12:30', title: '日川時計店 ＆ 餺飥午餐', desc: '富士吉田復古街景，品嚐山梨名物「不動餺飥麵」（南瓜蔬菜燉厚麵）。', query: '日川時計店' },
+          { time: '14:00', title: '河口湖大石公園 ＆ 忍野八海', desc: '漫步湖畔欣賞富士山倒影與可愛波波草，走訪清澈泉水忍野八海。', query: '大石公園' },
+          { time: '18:30', title: '專車返抵東京站', desc: '送回東京車站解散，晚餐推薦八重洲地下街「利久牛舌」定食。', query: '東京駅 八重洲南口' }
+        ]
+      },
+      {
+        day: 'Day 5',
+        date: '9/7 (二)',
+        title: '高尾山自然健行 ➔ 極樂湯露天溫泉',
+        items: [
+          { time: '08:30', title: 'JR 中央線直達高尾', desc: '東京站 1/2 號月台搭乘中央線快速至高尾站，站內轉京王線 1 站抵達高尾山口站。', query: '高尾山口駅' },
+          { time: '10:00', title: '登山纜車 ➔ 1號路登頂', desc: '清瀧站搭纜車直達半山腰，沿林蔭鋪路參拜藥王院天狗像登頂（標高 599m）。', query: '高尾山薬王院' },
+          { time: '12:30', title: '高橋家山藥蕎麥麵', desc: '下山品嚐滑順山藥泥蕎麥麵，半山腰可嚐現烤三福糰子與天狗燒。', query: '高橋家 高尾山' },
+          { time: '13:45', title: '京王極樂湯溫泉放鬆', desc: '出高尾山口站旁專用通道直達溫泉館，享受露天風呂與檜木湯池，徹底舒緩雙腿筋骨。', query: '京王高尾山温泉 極楽湯' }
+        ]
+      },
+      {
+        day: 'Day 6',
+        date: '9/8 (三)',
+        title: '八重洲伴手禮 ➔ 成田機場 T1 返台',
+        items: [
+          { time: '08:30', title: '東京站一番街伴手禮採買', desc: '退房寄存行李，選購 NewYork Perfect Cheese、Press Butter Sand 等伴手禮。', query: '東京駅一番街' },
+          { time: '10:10', title: '八重洲南口搭機場巴士', desc: '前往八重洲南口 7/8 號月台搭乘 TYO-NRT 巴士直達「成田機場第一航廈」（車程約 65 分）。', query: '東京駅八重洲南口 JR高速バスターミナル' },
+          { time: '11:20', title: '成田 T1 報到出境', desc: '抵達 4 樓報到大廳辦理虎航 IT201 託運與安檢（13:30 起飛），免稅店採買。', query: '成田空港第1ターミナル' },
+          { time: '16:25', title: '抵達桃機 T1 取車返家', desc: '入境出關，搭特約接駁車回停車場取車，自行開車經國道南下返回台中。', query: '桃園國際機場第一航廈' }
+        ]
+      }
+    ];
+
+    let currentDayIdx = 0;
+    let currentView = 'itinerary';
+    let expenses = JSON.parse(localStorage.getItem('tokyo_expenses') || '[]');
+
+    function init() {
+      renderTabs();
+      renderContent();
+    }
+
+    function renderTabs() {
+      const container = document.getElementById('day-tabs');
+      container.innerHTML = tripData.map((d, idx) => `
+        <button onclick="selectDay(${idx})" class="px-3.5 py-1.5 rounded-full text-xs transition-all ${
+          idx === currentDayIdx 
+            ? 'bg-blue-900 text-white font-bold shadow-sm' 
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+        }">
+          ${d.day} (${d.date.split(' ')[0]})
+        </button>
+      `).join('');
+    }
+
+    function selectDay(idx) {
+      currentDayIdx = idx;
+      renderTabs();
+      if (currentView === 'itinerary') renderContent();
+    }
+
+    function openMap(query) {
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
+      window.open(url, '_blank');
+    }
+
+    function switchView(view) {
+      currentView = view;
+      document.getElementById('nav-itin').className = view === 'itinerary' ? 'flex flex-col items-center text-blue-600 font-bold' : 'flex flex-col items-center text-slate-500';
+      document.getElementById('nav-transit').className = view === 'transit' ? 'flex flex-col items-center text-blue-600 font-bold' : 'flex flex-col items-center text-slate-500';
+      document.getElementById('nav-expense').className = view === 'expense' ? 'flex flex-col items-center text-blue-600 font-bold' : 'flex flex-col items-center text-slate-500';
+      renderContent();
+    }
+
+    function renderContent() {
+      const area = document.getElementById('content-area');
+      if (currentView === 'itinerary') {
+        const cur = tripData[currentDayIdx];
+        area.innerHTML = `
+          <div class="bg-blue-50 border-l-4 border-blue-900 p-3 rounded-r-lg">
+            <h2 class="text-sm font-bold text-blue-950">${cur.day} ｜ ${cur.date}</h2>
+            <p class="text-xs text-blue-800 font-medium">${cur.title}</p>
+          </div>
+          <div class="space-y-3">
+            ${cur.items.map(item => `
+              <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="inline-block bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded font-bold">${item.time}</span>
+                    <button onclick="openMap('${item.query}')" class="flex items-center space-x-1 bg-blue-600 text-white text-xs px-2.5 py-1 rounded-lg active:scale-95 shadow">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      <span>導航</span>
+                    </button>
+                  </div>
+                  <h3 class="text-sm font-bold text-slate-900">${item.title}</h3>
+                  <p class="text-xs text-slate-600 mt-1 leading-relaxed">${item.desc}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (currentView === 'transit') {
+        area.innerHTML = `
+          <div class="space-y-3">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+              <h3 class="font-bold text-sm text-blue-900 mb-1">🚌 機場巴士 (TYO-NRT)</h3>
+              <p class="text-xs text-slate-600 leading-relaxed mb-2">八重洲南口 1 樓戶外 7/8 號月台直達成田機場 T1/T2，免搬行李上下地鐵。單程 1,300 日圓，上車刷 IC 卡或購票。</p>
+              <button onclick="openMap('東京駅八重洲南口 JR高速バスターミナル')" class="w-full bg-blue-50 text-blue-700 border border-blue-200 text-xs py-1.5 rounded-lg font-bold">導航至八重洲巴士總站</button>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+              <h3 class="font-bold text-sm text-blue-900 mb-1">🏔️ 富士山 (Day 4 Klook 一日遊)</h3>
+              <p class="text-xs text-slate-600 leading-relaxed mb-2">集合地點通常於東京站丸之內南口（KITTE 大樓前），由八重洲經地下自由通路步行約 6-8 分鐘即達。</p>
+              <button onclick="openMap('KITTE丸の内')" class="w-full bg-blue-50 text-blue-700 border border-blue-200 text-xs py-1.5 rounded-lg font-bold">導航至 KITTE 集合點</button>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+              <h3 class="font-bold text-sm text-blue-900 mb-1">🍁 高尾山鐵道 (Day 5)</h3>
+              <p class="text-xs text-slate-600 leading-relaxed mb-2">JR 東京站 1/2 號月台搭乘「JR 中央線快速/中央特快」直達高尾站（約 55 分），站內轉乘京王線 1 站至「高尾山口站」。</p>
+              <button onclick="openMap('高尾山口駅')" class="w-full bg-blue-50 text-blue-700 border border-blue-200 text-xs py-1.5 rounded-lg font-bold">導航至高尾山口站</button>
+            </div>
+          </div>
+        `;
+      } else if (currentView === 'expense') {
+        const total = expenses.reduce((s, i) => s + Number(i.amount), 0);
+        area.innerHTML = `
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">日幣即時記帳</h3>
+            <div class="flex space-x-2">
+              <input id="exp-name" type="text" placeholder="項目 (如: 鰻魚飯)" class="border border-slate-300 rounded px-2.5 py-1 text-xs flex-1">
+              <input id="exp-val" type="number" placeholder="金額 (JPY)" class="border border-slate-300 rounded px-2.5 py-1 text-xs w-24">
+              <button onclick="addExpense()" class="bg-blue-900 text-white text-xs px-3 py-1 rounded font-bold">新增</button>
+            </div>
+            <div class="border-t border-slate-100 pt-2 flex justify-between items-center text-xs font-bold text-blue-900">
+              <span>累積支出：</span>
+              <span>¥ ${total.toLocaleString()} JPY</span>
+            </div>
+            <div class="space-y-1.5 max-h-56 overflow-y-auto">
+              ${expenses.map((e, i) => `
+                <div class="flex justify-between items-center text-xs bg-slate-50 px-2.5 py-1.5 rounded">
+                  <span>${e.name}</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-bold text-slate-700">¥ ${Number(e.amount).toLocaleString()}</span>
+                    <button onclick="delExpense(${i})" class="text-red-500 font-bold ml-1">✕</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function addExpense() {
+      const name = document.getElementById('exp-name').value.trim();
+      const val = document.getElementById('exp-val').value.trim();
+      if (!name || !val) return;
+      expenses.push({ name, amount: val });
+      localStorage.setItem('tokyo_expenses', JSON.stringify(expenses));
+      renderContent();
+    }
+
+    function delExpense(i) {
+      expenses.splice(i, 1);
+      localStorage.setItem('tokyo_expenses', JSON.stringify(expenses));
+      renderContent();
+    }
+
+    init();
+  </script>
+</body>
+</html>
